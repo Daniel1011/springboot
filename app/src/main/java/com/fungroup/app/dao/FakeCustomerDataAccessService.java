@@ -35,12 +35,26 @@ public class FakeCustomerDataAccessService implements CustomerDao {
 
     @Override
     public int deleteCustomerById(UUID id) {
-        return 0;
+
+        Optional<Customer> customerMaybe = selectCustomerById( id );
+        if (customerMaybe.isEmpty()){
+            return 0;
+        }
+      DB.remove( customerMaybe.get() );
+        return 1;
     }
 
     @Override
     public int updateCustomerById(UUID id, Customer customer) {
-        return 0;
+        return selectCustomerById( id )
+                .map( customer1 -> {
+                    int indexofCustomerToDelete = DB.indexOf( customer );
+                    if (indexofCustomerToDelete > 0){
+                        DB.set( indexofCustomerToDelete,customer );
+                        return 1;
+                    }
+                    return 0;
+                } ).orElse( 0 );
     }
 
 }
